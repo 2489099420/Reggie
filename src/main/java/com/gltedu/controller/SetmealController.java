@@ -12,6 +12,8 @@ import com.gltedu.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +39,7 @@ public class SetmealController {
      * 新增套餐
      * */
     @PostMapping
+    @CacheEvict(value = "setmealCache",allEntries = true)
     public R save(@RequestBody SetmealDto setmealDto) {
         log.info("套餐信息:{}", setmealDto);
         setmealService.saveWithDish(setmealDto);
@@ -87,6 +90,7 @@ public class SetmealController {
      * 删除套餐
      * */
     @DeleteMapping
+    @CacheEvict(value = "setmealCache",allEntries = true)
     public R delete(@RequestParam List ids) {
         log.info("ids:{}", ids);
         setmealService.removeWithDish(ids);
@@ -97,6 +101,7 @@ public class SetmealController {
     /*
     * 根据条件查询套餐数据
     * */
+    @Cacheable(value = "setmealCache",key = "#setmeal.categoryId + '_' + #setmeal.status")
     @GetMapping("/list")
     public R list(Setmeal setmeal){
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
