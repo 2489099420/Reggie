@@ -16,4 +16,4 @@
 sql文件在resource文件下 需要修改的内容有：
 mysql数据库账号密码
 redis数据库账号密码
-修改utils工具包下的SMSUtils.java文件中阿里云短信和对象存储服务的secretId和secretKey，当然buckerName、region、url也需要修改。使用者可自行申请阿里云短信和对象存储服务后来填充密钥等信息
+修改utils工具包下的SMSUtils.java文件中阿里云短信secretId和secretKey，使用者可自行申请阿里云短信后来填充密钥等信息
