@@ -1,8 +1,10 @@
 package com.gltedu.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.gltedu.common.R;
+import com.gltedu.dto.DishDto;
 import com.gltedu.dto.SetmealDto;
 import com.gltedu.entity.Category;
 import com.gltedu.entity.Setmeal;
@@ -12,6 +14,8 @@ import com.gltedu.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +41,7 @@ public class SetmealController {
      * 新增套餐
      * */
     @PostMapping
+    @CacheEvict(value = "setmealCache",allEntries = true)//删除setmealCache分类下的所有数据
     public R save(@RequestBody SetmealDto setmealDto) {
         log.info("套餐信息:{}", setmealDto);
         setmealService.saveWithDish(setmealDto);
@@ -87,6 +92,7 @@ public class SetmealController {
      * 删除套餐
      * */
     @DeleteMapping
+    @CacheEvict(value = "setmealCache",allEntries = true)//删除setmealCache分类下的所有数据
     public R delete(@RequestParam List ids) {
         log.info("ids:{}", ids);
         setmealService.removeWithDish(ids);
@@ -98,6 +104,7 @@ public class SetmealController {
     * 根据条件查询套餐数据
     * */
     @GetMapping("/list")
+    @Cacheable(value = "setmealCache",key = "#setmeal.categoryId + '_' + #setmeal.status")
     public R list(Setmeal setmeal){
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(setmeal.getCategoryId() != null,Setmeal::getCategoryId,setmeal.getCategoryId());
@@ -108,5 +115,52 @@ public class SetmealController {
 
         return R.success(list);
 
+    }
+
+    /*
+    * 停售套餐
+    * */
+    @PostMapping("/status/0")
+    @CacheEvict(value = "setmealCache",allEntries = true)//删除setmealCache分类下的所有数据
+    public R statusDish(@RequestParam List<Long> ids){
+        UpdateWrapper updateWrapper = new UpdateWrapper();
+        updateWrapper.in("id",ids);
+        updateWrapper.set("status","0");
+        setmealService.update(null,updateWrapper);
+
+        return R.success("菜品停售成功");
+    }
+    /*
+    * 启售套餐
+    * */
+    @PostMapping("/status/1")
+    @CacheEvict(value = "setmealCache",allEntries = true)//删除setmealCache分类下的所有数据
+    public R status1Dish(@RequestParam List<Long> ids){
+        UpdateWrapper updateWrapper = new UpdateWrapper();
+        updateWrapper.in("id",ids);
+        updateWrapper.set("status","1");
+        setmealService.update(null,updateWrapper);
+
+        return R.success("菜品启售成功");
+    }
+
+    /*
+    * 修改套餐
+    * */
+    @PutMapping
+    @CacheEvict(value = "setmealCache",allEntries = true)//删除setmealCache分类下的所有数据
+    public R putSetmeal(@RequestBody SetmealDto setmealDto){
+        setmealService.updateWithDish(setmealDto);
+        return R.success("修改成功");
+    }
+
+    /*
+     * 根据id查询套餐信息和对应的套餐菜品口味信息
+     * */
+    @GetMapping("/{id}")
+    public R get(@PathVariable Long id){
+        SetmealDto setmealDto = setmealService.getByIdWithFlavor(id);
+
+        return R.success(setmealDto);
     }
 }

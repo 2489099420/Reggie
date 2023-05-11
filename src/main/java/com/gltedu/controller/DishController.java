@@ -1,18 +1,21 @@
 package com.gltedu.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.gltedu.common.R;
 import com.gltedu.dto.DishDto;
 import com.gltedu.entity.Category;
 import com.gltedu.entity.Dish;
 import com.gltedu.entity.DishFlavor;
+import com.gltedu.mapper.DishMapper;
 import com.gltedu.service.CategoryService;
 import com.gltedu.service.DishFlavorService;
 import com.gltedu.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,7 +55,7 @@ public class DishController {
 //        Set keys = redisTemplate.keys("dish_*");
 //        redisTemplate.delete(keys);
 
-        //清理某个分类下面的菜品缓存数据
+//        //清理某个分类下面的菜品缓存数据
         String key = "dish_" + dishDto.getCategoryId() + "_1";
         redisTemplate.delete(key);
 
@@ -119,11 +122,11 @@ public class DishController {
 
         dishService.updateWithFlavor(dishDto);
 
-        //清理所有菜品的缓存数据
+//        //清理所有菜品的缓存数据
 //        Set keys = redisTemplate.keys("dish_*");
 //        redisTemplate.delete(keys);
 
-        //清理某个分类下面的菜品缓存数据
+//        //清理某个分类下面的菜品缓存数据
         String key = "dish_" + dishDto.getCategoryId() + "_1";
         redisTemplate.delete(key);
 
@@ -198,5 +201,48 @@ public class DishController {
 
         return R.success(dishDtoList);
     }
+/*
+* 根据id删除菜品
+* */
+    @DeleteMapping
 
+    public R deleteDish(@RequestParam List ids){
+        dishService.removeWithFlavor(ids);
+        //清理所有菜品的缓存数据
+        Set keys = redisTemplate.keys("dish_*");
+        redisTemplate.delete(keys);
+        return R.success("菜品删除成功");
+    }
+    /*
+    * 停售菜品
+    * */
+    @PostMapping("/status/0")
+    public R statusDish(@RequestParam List<Long> ids){
+        UpdateWrapper updateWrapper = new UpdateWrapper();
+        updateWrapper.in("id",ids);
+        updateWrapper.set("status","0");
+        dishService.update(null,updateWrapper);
+
+        //清理所有菜品的缓存数据
+        Set keys = redisTemplate.keys("dish_*");
+        redisTemplate.delete(keys);
+
+        return R.success("菜品停售成功");
+    }
+    /*
+    * 启售菜品
+    * */
+    @PostMapping("/status/1")
+    public R status1Dish(@RequestParam List<Long> ids){
+        UpdateWrapper updateWrapper = new UpdateWrapper();
+        updateWrapper.in("id",ids);
+        updateWrapper.set("status","1");
+        dishService.update(null,updateWrapper);
+
+        //清理所有菜品的缓存数据
+        Set keys = redisTemplate.keys("dish_*");
+        redisTemplate.delete(keys);
+
+        return R.success("菜品启售成功");
+    }
 }

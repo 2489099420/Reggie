@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.gltedu.dto.DishDto;
 import com.gltedu.entity.Dish;
 
+import java.util.List;
+
 /**
  * @author 巩乐天
  * @version 1.0
@@ -17,4 +19,8 @@ public interface DishService extends IService<Dish> {
 
     //更新菜品信息 同时更新对应的口味信息
     public void updateWithFlavor(DishDto dishDto);
+
+    public void removeWithFlavor(List ids);
+
+
 }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -70,7 +71,7 @@ public class UserController {
         //从Session中获取保存的验证码
 //        Object codeInSession = session.getAttribute(phone);
 
-        //从Redis中获取缓存的验证码
+//        //从Redis中获取缓存的验证码
         Object codeInSession = redisTemplate.opsForValue().get(phone);
 
         //进行验证码的比对（页面提交的验证码和Session中保存的验证码比对)
@@ -94,7 +95,10 @@ public class UserController {
 
             return R.success(user);
         }
-
         return R.error("登录失败");
     }
+    /*
+    * 退出登陆
+    * */
+
 }

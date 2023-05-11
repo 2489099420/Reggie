@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8848
 spring:
   application:
 #    应用名称可选
@@ -10,12 +10,18 @@ spring:
       url: jdbc:mysql://localhost:3306/reggie
       username: root
       password: root
+#      url: jdbc:mysql://47.94.101.19:3306/reggie
+#      username: reggie
+#      password: reggie
   redis:
-#    host: 47.94.101.19
-    host: localhost
+    host: 47.94.101.19
+#    host: localhost
     port: 6379
-#    password: 123456
+    password: tian
     database: 0
+  cache:
+    redis:
+      time-to-live: 1800000 #设置缓存数据的过期时间
 mybatis-plus:
   configuration:
     #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
@@ -26,3 +32,4 @@ mybatis-plus:
       id-type: ASSIGN_ID
 reggie:
   path: E:\images\
+#  path: /reggie/images/

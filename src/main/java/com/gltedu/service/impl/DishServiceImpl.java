@@ -2,9 +2,11 @@ package com.gltedu.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gltedu.common.CustomException;
 import com.gltedu.dto.DishDto;
 import com.gltedu.entity.Dish;
 import com.gltedu.entity.DishFlavor;
+import com.gltedu.entity.Setmeal;
 import com.gltedu.mapper.DishMapper;
 import com.gltedu.service.DishFlavorService;
 import com.gltedu.service.DishService;
@@ -27,6 +29,9 @@ import java.util.stream.Collectors;
 public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements DishService {
     @Autowired
     private DishFlavorService dishFlavorService;
+
+    @Autowired
+    private DishMapper dishMapper;
     /*
     * 新增菜品同时保存对应的口味数据
     * */
@@ -92,4 +97,22 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
         dishFlavorService.saveBatch(flavors);
     }
+
+    @Override
+    public void removeWithFlavor(List ids) {
+        //查询菜品状态，确定是否可以删除
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.in(Dish::getId,ids);
+        queryWrapper.eq(Dish::getStatus,1);
+
+        Long count = this.count(queryWrapper);
+        if(count > 0){
+            //如果不能删除  抛出一个业务异常
+            throw new CustomException("菜品正在售卖中，不能删除");
+        }
+
+        this.removeByIds(ids);
+    }
+
+
 }
