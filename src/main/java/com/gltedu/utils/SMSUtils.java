@@ -20,11 +20,11 @@ public class SMSUtils {
 	 * @param param 参数
 	 */
 	public static void sendMessage(String signName, String templateCode,String phoneNumbers,String param){
-		DefaultProfile profile = DefaultProfile.getProfile("", "", "");
+		DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", "", "");
 		IAcsClient client = new DefaultAcsClient(profile);
 
 		SendSmsRequest request = new SendSmsRequest();
-		request.setSysRegionId("");
+		request.setSysRegionId("cn-hangzhou");
 		request.setPhoneNumbers(phoneNumbers);
 		request.setSignName(signName);
 		request.setTemplateCode(templateCode);
